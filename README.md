@@ -11,6 +11,12 @@ project or Seeed Studio.
 > **Beta.** Built and used on one board so far. See [Status](#status) before
 > you rely on it, and [TCXO voltage](#tcxo-voltage) before you transmit.
 
+## On the device
+
+| Map | Repeaters | Send message |
+|---|---|---|
+| ![Map tab with count circles and range rings](docs/screenshots/map.jpg) | ![Repeater list sorted by hops, with details beside it](docs/screenshots/repeaters.jpg) | ![Sender menu in a public channel](docs/screenshots/send-message.jpg) |
+
 ## Features
 
 - **Chat:** direct messages and channels with a virtual keyboard, colour emoji,
