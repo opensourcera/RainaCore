@@ -1,128 +1,158 @@
-## About MeshCore
+<p align="center"><img src="docs/rainacore-logo.png" alt="RainaCore" width="480"></p>
 
-MeshCore is a lightweight, portable C++ library that enables multi-hop packet routing for embedded projects using LoRa and other packet radios. It is designed for developers who want to create resilient, decentralized communication networks that work without the internet.
+Open-source touch firmware for the **Seeed Wio Tracker L2 Pro**, with no phone
+needed: chat, contacts, repeaters, channels and an offline map on the 320×240
+screen.
 
-## 🔍 What is MeshCore?
+**Compatible with MeshCore, but not connected to MeshCore development.** RainaCore
+is an independent project, not affiliated with or endorsed by the MeshCore
+project or Seeed Studio.
 
-MeshCore now supports a range of LoRa devices, allowing for easy flashing without the need to compile firmware manually. Users can flash a pre-built binary using tools like Adafruit ESPTool and interact with the network through a serial console.
-MeshCore provides the ability to create wireless mesh networks, similar to Meshtastic and Reticulum but with a focus on lightweight multi-hop packet routing for embedded projects. Unlike Meshtastic, which is tailored for casual LoRa communication, or Reticulum, which offers advanced networking, MeshCore balances simplicity with scalability, making it ideal for custom embedded solutions, where devices (nodes) can communicate over long distances by relaying messages through intermediate nodes. This is especially useful in off-grid, emergency, or tactical situations where traditional communication infrastructure is unavailable.
+> **Beta.** Built and used on one board so far. See [Status](#status) before
+> you rely on it, and [TCXO voltage](#tcxo-voltage) before you transmit.
 
-## ⚡ Key Features
+## Features
 
-* Multi-Hop Packet Routing
-  * Devices can forward messages across multiple nodes, extending range beyond a single radio's reach.
-  * Supports up to a configurable number of hops to balance network efficiency and prevent excessive traffic.
-  * Nodes use fixed roles where "Companion" nodes are not repeating messages at all to prevent adverse routing paths from being used.
-* Supports LoRa Radios – Works with Heltec, RAK Wireless, and other LoRa-based hardware.
-* Decentralized & Resilient – No central server or internet required; the network is self-healing.
-* Low Power Consumption – Ideal for battery-powered or solar-powered devices.
-* Simple to Deploy – Pre-built example applications make it easy to get started.
+- **Chat:** direct messages and channels with a virtual keyboard, colour emoji,
+  quick replies with variables such as hop count, and a tap menu on each sender.
+- **Channels:** private and public channels, joined by name or shared by QR code.
+- **Contacts:** favourites and personal notes.
+- **Repeaters:** a two-pane list sorted by hops, with details beside it.
+- **Map:** full-screen map behind the interface, with Terrain, Map and Flat
+  styles. Nearby nodes collapse into count circles; tap one to zoom in.
+- **WiFi map sync:** downloads map tiles to the SD card, then switches WiFi off.
+- **GPS:** sets the clock, time zone and radio region suggestion, with no
+  internet needed.
+- **Bot:** optional hourly test message to the `#Test` channel. Off by default.
+- **Bluetooth:** optional link to the MeshCore phone app, with an off switch.
 
-## 🎯 What Can You Use MeshCore For?
+## Hardware
 
-* Off-Grid Communication: Stay connected even in remote areas.
-* Emergency Response & Disaster Recovery: Set up instant networks where infrastructure is down.
-* Outdoor Activities: Hiking, camping, and adventure racing communication.
-* Tactical & Security Applications: Military, law enforcement, and private security use cases.
-* IoT & Sensor Networks: Collect data from remote sensors and relay it back to a central location.
+| | |
+|---|---|
+| Board | Seeed Wio Tracker L2 Pro |
+| MCU | ESP32-S3, 16 MB flash, 8 MB PSRAM |
+| Radio | SX1262 |
+| Screen | NV3031B 320×240 with GT911 touch |
+| GPS | L76K |
+| Storage | microSD, needed for maps and chat history |
 
-## 🚀 How to Get Started
+## Install
 
-- Watch the [MeshCore QuickStart Playlist](https://www.youtube.com/watch?v=iaFltojJrAc&list=PLshzThxhw4O4WU_iZo3NmNZOv6KMrUuF9) by The Comms Channel
-- Watch the [MeshCore Technical Presentation](https://www.youtube.com/watch?v=OwmkVkZQTf4) by Liam Cottle.
-- Read through our [Frequently Asked Questions](./docs/faq.md) and [Documentation](https://docs.meshcore.io).
-- Flash the MeshCore firmware on a supported device.
-- Connect with a supported client.
+Download the files from [Releases](https://github.com/opensourcera/RainaCore/releases)
+and check them against `SHA256SUMS.txt`.
 
-For developers:
+**Back up your board first.** Replace `COM19` with your port. Keep this file
+private: it holds your device's keys and settings.
 
-- Install [PlatformIO](https://docs.platformio.org) in [Visual Studio Code](https://code.visualstudio.com).
-- Clone and open the MeshCore repository in Visual Studio Code.
-- See the example applications you can modify and run:
-  - [Companion Radio](./examples/companion_radio) - For use with an external chat app, over BLE, USB or Wi-Fi.
-  - [KISS Modem](./examples/kiss_modem) - Serial KISS protocol bridge for host applications. ([protocol docs](./docs/kiss_modem_protocol.md))
-  - [Simple Repeater](./examples/simple_repeater) - Extends network coverage by relaying messages.
-  - [Simple Room Server](./examples/simple_room_server) - A simple BBS server for shared Posts.
-  - [Simple Secure Chat](./examples/simple_secure_chat) - Secure terminal based text communication between devices.
-  - [Simple Sensor](./examples/simple_sensor) - Remote sensor node with telemetry and alerting.
+    python -m esptool --chip esp32s3 --port COM19 --baud 921600 read-flash 0 0x1000000 backup.bin
 
-The Simple Secure Chat example can be interacted with through the Serial Monitor in Visual Studio Code, or with a Serial USB Terminal on Android.
+First install:
 
-## ⚡️ MeshCore Flasher
+    python -m esptool --chip esp32s3 --port COM19 --baud 921600 write-flash \
+      0x0 bootloader.bin 0x8000 partitions.bin 0xe000 boot_app0.bin \
+      0x10000 rainacore-l2-touch-1v8-0.1.0-beta.bin
 
-We have prebuilt firmware ready to flash on supported devices.
+Updating RainaCore keeps your contacts, keys, settings and chat history:
 
-- Launch https://meshcore.io/flasher
-- Select a supported device
-- Flash one of the firmware types:
-  - Companion, Repeater or Room Server
-- Once flashing is complete, you can connect with one of the MeshCore clients below.
+    python -m esptool --chip esp32s3 --port COM19 --baud 921600 write-flash \
+      0x10000 rainacore-l2-touch-1v8-0.1.0-beta.bin
 
-## 📱 MeshCore Clients
+Then set your region in the setup wizard before transmitting. Use only the
+frequencies and power allowed where you are.
 
-**Companion Firmware**
+## Getting a map
 
-The companion firmware can be connected to via BLE, USB or Wi-Fi depending on the firmware type you flashed.
+The firmware includes no map tiles.
 
-- Web: https://app.meshcore.nz
-- Android: https://play.google.com/store/apps/details?id=com.liamcottle.meshcore.android
-- iOS: https://apps.apple.com/us/app/meshcore/id6742354151?platform=iphone
-- NodeJS: https://github.com/liamcottle/meshcore.js
-- Python: https://github.com/fdlamotte/meshcore-cli
+1. Put a microSD card in the board.
+2. Open the Map tab and choose Terrain or Map.
+3. Tap **WiFi** in the top bar, or use Settings > WiFi.
+4. Pick your 2.4 GHz network, enter the password, check the centre, choose an
+   area and tap **Sync**.
 
-**Repeater and Room Server Firmware**
+The WiFi password is held in memory for that sync only and is never saved.
+Downloads are deliberately slow and capped at 1200 tiles, to respect the free
+map servers that provide them.
 
-The repeater and room server firmware can be set up via USB in the web config tool.
+## Status
 
-- https://config.meshcore.io
+| Works on the test board | Not tested on hardware yet |
+|---|---|
+| Boot, touch UI, SD card | WiFi map sync and place names |
+| Bluetooth pairing with the phone app | A real GPS fix |
+| Receiving messages | Sending, and delivery receipts |
+| | QR channel sharing with the phone app |
 
-They can also be managed via LoRa in the mobile app by using the Remote Management feature.
+Not built yet: room server chat. Rooms appear in Contacts and open the
+management screen only.
 
-## 🛠 Hardware Compatibility
+## TCXO voltage
 
-MeshCore is designed for devices listed in the [MeshCore Flasher](https://meshcore.io/flasher)
+The correct TCXO voltage for this board is **not confirmed**. The stock firmware
+requests 1.8 V, while Meshtastic moved to 3.0 V. Each release is therefore built
+per voltage, and only the 1.8 V build exists so far.
 
-## 📜 License
+A wrong value may stop the radio working or affect its RF behaviour. Keep
+transmit power low until it is settled. `tools/l2_tcxo_check.py` reports what
+Meshtastic requests on a board; it is not an electrical measurement.
 
-MeshCore is open-source software released under the MIT License. You are free to use, modify, and distribute it for personal and commercial projects.
+## Privacy
 
-## Contributing
+- **Map sync** contacts `tile.openstreetmap.org` or `tile.opentopomap.org`, and
+  `nominatim.openstreetmap.org` for place names. Nominatim receives the sync
+  centre and up to 12 repeater positions, rounded to about 1 km.
+- **Connections are not certificate-checked.** Tiles are checked as images, and
+  place names are only displayed.
+- **GPS log:** raw GPS sentences, which include your position, are written to
+  `gps_nmea.log` on the SD card for diagnosis. Delete the file if you lend out
+  the card.
 
-Please submit PR's using 'dev' as the base branch!
-For minor changes just submit your PR and we'll try to review it, but for anything more 'impactful' please open an Issue first and start a discussion. It is better to sound out what it is you want to achieve first, and try to come to a consensus on what the best approach is, especially when it impacts the structure or architecture of this codebase.
+## Build
 
-Here are some general principles you should try to adhere to:
-* Keep it simple. Please, don't think like a high-level lang programmer. Think embedded, and keep code concise, without any unnecessary layers.
-* No dynamic memory allocation, except during setup/begin functions.
-* Use the same brace and indenting style that's in the core source modules. (A .clang-format is probably going to be added soon, but please do NOT retroactively re-format existing code. This just creates unnecessary diffs that make finding problems harder)
+Needs [PlatformIO](https://platformio.org/).
 
-Help us prioritize! Please react with thumbs-up to issues/PRs you care about most. We look at reaction counts when planning work.
+    pio run -e RainaCore_L2_1V8_touch
 
-### Running unit tests
+### Tools
 
-To run unit tests, run the following command:
+| Path | What it does |
+|---|---|
+| `tools/pc-bench/` | Runs the real map and repeater screens on a PC with scripted touches |
+| `tools/l2_tcxo_check.py` | Reads the TCXO setting Meshtastic reports at boot |
+| `variants/wio-tracker-l2/tools/` | Packs and darkens map tiles on a PC |
+| `examples/companion_radio/ui-lvgl/tools/` | Regenerates the emoji font and logo |
 
-```bash
-pio test --environment native --verbose
-```
+## Project layout
 
-## Road-Map / To-Do
+RainaCore is MeshCore v1.18.0 plus the changes below. The original project
+README is kept as [README.MeshCore.md](README.MeshCore.md).
 
-There are a number of fairly major features in the pipeline, with no particular time-frames attached yet. In very rough chronological order:
-- [X] Companion radio: UI redesign
-- [X] Repeater + Room Server: add ACL's (like Sensor Node has)
-- [X] Standardise Bridge mode for repeaters
-- [ ] Repeater/Bridge: Standardise the Transport Codes for zoning/filtering
-- [X] Core + Repeater: enhanced zero-hop neighbour discovery
-- [ ] Core: round-trip manual path support
-- [ ] Companion + Apps: support for multiple sub-meshes (and 'off-grid' client repeat mode)
-- [ ] Core + Apps: support for LZW message compression
-- [ ] Core: dynamic CR (Coding Rate) for weak vs strong hops
-- [ ] Core: new framework for hosting multiple virtual nodes on one physical device
-- [ ] V2 protocol spec: discussion and consensus around V2 packet protocol, including path hashes, new encryption specs, etc
+| Path | Contents |
+|---|---|
+| `examples/companion_radio/ui-lvgl/` | The touch interface |
+| `variants/wio-tracker-l2/` | Board support and build settings |
+| `licenses/` | Font licences |
 
-## 📞 Get Support
+## Credits and licences
 
-- Report bugs and request features on the [GitHub Issues](https://github.com/meshcore-dev/meshcore/issues) page.
-- Find additional guides and components on [my site](https://buymeacoffee.com/ripplebiz).
-- Join [MeshCore Discord](https://meshcore.gg) to chat with the developers and get help from the community.
+Copyright (c) 2026 opensourcera. Released under the MIT licence, see
+[license.txt](license.txt).
+
+- [MeshCore](https://github.com/meshcore-dev/MeshCore), MIT.
+- Touch UI base by plainsbuilder (MeshCore PR #3529) and Wio Tracker L2 board
+  support (PR #3381), both unmerged upstream at the time of import.
+- [LVGL](https://lvgl.io/), MIT.
+- Inter font, SIL Open Font License 1.1, see `licenses/Inter-OFL.txt`.
+- Noto Color Emoji, SIL Open Font License 1.1, see `licenses/NotoEmoji-OFL.txt`.
+- Audiowide font in the logo, by Astigmatic (Brian J. Bonislawsky), SIL Open
+  Font License 1.1, see `licenses/Audiowide-OFL.txt`.
+- Map data © OpenStreetMap contributors, ODbL. Place names are looked up through
+  Nominatim. Fetched by the user over WiFi; none are included in this firmware.
+- Terrain style © OpenTopoMap, CC-BY-SA, with SRTM data.
+
+Meshtastic is GPL-3.0. No Meshtastic code may be copied into this project.
+
+## Contact
+
+opensource@gmail.com

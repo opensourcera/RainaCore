@@ -1,0 +1,8 @@
+obj/
+sd/
+*.exe
+*.rgb
+*.png
+*_b.cpp
+MapView.h
+UIPlaces.h
