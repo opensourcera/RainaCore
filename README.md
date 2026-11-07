@@ -112,13 +112,16 @@ management screen only.
 
 ## TCXO voltage
 
-The correct TCXO voltage for this board is **not confirmed**. The stock firmware
-requests 1.8 V, while Meshtastic moved to 3.0 V. Each release is therefore built
-per voltage, and only the 1.8 V build exists so far.
+This beta is a **1.8 V build, meant for testing**. The stock firmware requests
+1.8 V, so this is the expected setting, but the correct voltage for this board
+is not confirmed: Meshtastic moved to 3.0 V.
 
-A wrong value may stop the radio working or affect its RF behaviour. Keep
-transmit power low until it is settled. `tools/l2_tcxo_check.py` reports what
-Meshtastic requests on a board; it is not an electrical measurement.
+On a board that needs 3.0 V, the radio may not work properly, for example weak or
+failed sending and receiving. A 3.0 V build will follow if it is needed. Keep
+transmit power low while testing.
+
+`tools/l2_tcxo_check.py` reports what Meshtastic requests on a board; it is not an
+electrical measurement.
 
 ## Privacy
 
