@@ -45,27 +45,43 @@ project or Seeed Studio.
 
 ## Install
 
-Download the files from [Releases](https://github.com/opensourcera/RainaCore/releases)
-and check them against `SHA256SUMS.txt`.
+You need a USB-C data cable and [Python](https://www.python.org/downloads/).
 
-**Back up your board first.** Replace `COM19` with your port. Keep this file
-private: it holds your device's keys and settings.
+1. Install esptool, version 5 or newer:
 
-    python -m esptool --chip esp32s3 --port COM19 --baud 921600 read-flash 0 0x1000000 backup.bin
+       python -m pip install --upgrade esptool
 
-First install:
+2. Download `bootloader.bin`, `partitions.bin`, `boot_app0.bin`,
+   `rainacore-l2-touch-1v8-0.1.0-beta.bin` and `SHA256SUMS.txt` from
+   [Releases](https://github.com/opensourcera/RainaCore/releases) into one
+   folder, and check them against `SHA256SUMS.txt`.
 
-    python -m esptool --chip esp32s3 --port COM19 --baud 921600 write-flash \
-      0x0 bootloader.bin 0x8000 partitions.bin 0xe000 boot_app0.bin \
-      0x10000 rainacore-l2-touch-1v8-0.1.0-beta.bin
+3. Connect the board and find its port. On Windows it is listed under Ports in
+   Device Manager, such as `COM19`. On Linux and macOS it looks like
+   `/dev/ttyACM0`. Use your port in the commands below.
 
-Updating RainaCore keeps your contacts, keys, settings and chat history:
+4. Open a terminal in that folder and back up your board. Keep this file private:
+   it holds your device's keys and settings.
 
-    python -m esptool --chip esp32s3 --port COM19 --baud 921600 write-flash \
-      0x10000 rainacore-l2-touch-1v8-0.1.0-beta.bin
+       python -m esptool --chip esp32s3 --port COM19 --baud 921600 read-flash 0 0x1000000 backup.bin
 
-Then set your region in the setup wizard before transmitting. Use only the
-frequencies and power allowed where you are.
+5. Install RainaCore. This is one long command, and it replaces the firmware on
+   the board:
+
+       python -m esptool --chip esp32s3 --port COM19 --baud 921600 write-flash 0x0 bootloader.bin 0x8000 partitions.bin 0xe000 boot_app0.bin 0x10000 rainacore-l2-touch-1v8-0.1.0-beta.bin
+
+6. The board restarts into RainaCore. Set your region in the setup wizard before
+   transmitting, and use only the frequencies and power allowed where you are.
+
+If esptool cannot connect, close any other program using the port, then try
+again. If that fails, put the board into bootloader mode and retry.
+
+**To update RainaCore later,** write the firmware file only. This keeps your
+contacts, keys, settings and chat history:
+
+    python -m esptool --chip esp32s3 --port COM19 --baud 921600 write-flash 0x10000 rainacore-l2-touch-1v8-0.1.0-beta.bin
+
+To go back, write your backup: `write-flash 0x0 backup.bin`.
 
 ## Getting a map
 
@@ -89,6 +105,7 @@ map servers that provide them.
 | Bluetooth pairing with the phone app | A real GPS fix |
 | Receiving messages | Sending, and delivery receipts |
 | | QR channel sharing with the phone app |
+| | The four-file first install on a stock board |
 
 Not built yet: room server chat. Rooms appear in Contacts and open the
 management screen only.
